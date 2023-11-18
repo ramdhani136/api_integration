@@ -1,13 +1,22 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from . import __version__ as app_version
 
 app_name = "api_integration"
 app_title = "Api Integration"
 app_publisher = "DAS"
-app_description = "DAS"
+app_description = "API Integration for managing API within Frappe. Get, Insert, Update, Logging"
 app_icon = "octicon octicon-file-directory"
 app_color = "grey"
 app_email = "digitalasiasolusindo@gmail.com"
 app_license = "MIT"
+
+# Fixtures
+# ------------------
+
+# fixtures = [
+# 	'API Request'
+# ]
 
 # Includes in <head>
 # ------------------
@@ -19,13 +28,6 @@ app_license = "MIT"
 # include js, css files in header of web template
 # web_include_css = "/assets/api_integration/css/api_integration.css"
 # web_include_js = "/assets/api_integration/js/api_integration.js"
-
-# include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "api_integration/public/scss/website"
-
-# include js, css files in header of web form
-# webform_include_js = {"doctype": "public/js/doctype.js"}
-# webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
@@ -47,6 +49,9 @@ app_license = "MIT"
 #	"Role": "home_page"
 # }
 
+# Website user home page (by function)
+# get_website_user_home_page = "api_integration.utils.get_home_page"
+
 # Generators
 # ----------
 
@@ -58,12 +63,6 @@ app_license = "MIT"
 
 # before_install = "api_integration.install.before_install"
 # after_install = "api_integration.install.after_install"
-
-# Uninstallation
-# ------------
-
-# before_uninstall = "api_integration.uninstall.before_uninstall"
-# after_uninstall = "api_integration.uninstall.after_uninstall"
 
 # Desk Notifications
 # ------------------
@@ -83,46 +82,33 @@ app_license = "MIT"
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
-# DocType Class
-# ---------------
-# Override standard doctype classes
-
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
-
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"*": {
+		"after_insert"	: ["api_integration.api_integration.doctype.api_creation.api_creation.run_after_insert"],
+		"validate"		: ["api_integration.api_integration.doctype.api_creation.api_creation.run_validate"],
+		"on_submit"		: ["api_integration.api_integration.doctype.api_creation.api_creation.run_on_submit"],
+		"on_cancel"		: ["api_integration.api_integration.doctype.api_creation.api_creation.run_on_cancel"],
+		"on_trash"		: ["api_integration.api_integration.doctype.api_creation.api_creation.run_on_trash"]
+	},
+	"File": {
+		"after_insert"	: ["api_integration.controllers.file_controller.generate_thumbnail_hooks"],
+	}
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"api_integration.tasks.all"
-# 	],
-# 	"daily": [
-# 		"api_integration.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"api_integration.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"api_integration.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"api_integration.tasks.monthly"
-# 	]
-# }
+scheduler_events = {
+	"cron": {
+		"0 0 * * 1": [
+			"api_integration.scheduler_events.remove_success_api"
+		]
+	}
+}
 
 # Testing
 # -------
@@ -143,46 +129,3 @@ app_license = "MIT"
 # 	"Task": "api_integration.task.get_dashboard_data"
 # }
 
-# exempt linked doctypes from being automatically cancelled
-#
-# auto_cancel_exempted_doctypes = ["Auto Repeat"]
-
-
-# User Data Protection
-# --------------------
-
-user_data_fields = [
-	{
-		"doctype": "{doctype_1}",
-		"filter_by": "{filter_by}",
-		"redact_fields": ["{field_1}", "{field_2}"],
-		"partial": 1,
-	},
-	{
-		"doctype": "{doctype_2}",
-		"filter_by": "{filter_by}",
-		"partial": 1,
-	},
-	{
-		"doctype": "{doctype_3}",
-		"strict": False,
-	},
-	{
-		"doctype": "{doctype_4}"
-	}
-]
-
-# Authentication and authorization
-# --------------------------------
-
-# auth_hooks = [
-# 	"api_integration.auth.validate"
-# ]
-
-# Translation
-# --------------------------------
-
-# Make link fields search translated document names for these DocTypes
-# Recommended only for DocTypes which have limited documents with untranslated names
-# For example: Role, Gender, etc.
-# translated_search_doctypes = []
